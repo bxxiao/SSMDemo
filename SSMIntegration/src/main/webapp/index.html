@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Index</title>
+    <!-- 3个文件的导入顺序不能错 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <!-- 模态框，用于添加新员工 -->
+    <div class="modal fade" id="empAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">添加新员工</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="empNameInput" class="col-sm-2 control-label">员工姓名</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="empName" class="form-control" id="empNameInput" placeholder="员工姓名">
+                                <!-- 提示信息 -->
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="empEmailInput" class="col-sm-2 control-label">员工邮箱</label>
+                            <div class="col-sm-10">
+                                <input type="email" name="email" class="form-control" id="empEmailInput" placeholder="员工邮箱">
+                                <!-- 提示信息 -->
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">性别</label>
+                            <div class="col-sm-10">
+                                <label class="radio-inline">
+                                    <input type="radio" name="gender" id="man" value="男"> 男
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="gender" id="woman" value="女"> 女
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">部门</label>
+                            <div class="col-sm-10">
+                                <select class="form-control deptSelect" name="dId"></select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="addSubmit">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框，用于修改员工信息 -->
+    <div class="modal fade" id="empUpdateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">员工信息修改</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="empNameInput" class="col-sm-2 control-label">员工姓名</label>
+                            <div class="col-sm-10">
+                                <!-- 员工姓名静态显示 -->
+                                <p class="form-control-static" id="staticEmpName"></p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="empEmailInput" class="col-sm-2 control-label">员工邮箱</label>
+                            <div class="col-sm-10">
+                                <input type="email" name="email" class="form-control" id="empEmailUpdateInput" placeholder="员工邮箱">
+                                <!-- 提示信息 -->
+                                <span class="help-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">性别</label>
+                            <div class="col-sm-10">
+                                <label class="radio-inline">
+                                    <input type="radio" name="gender" value="男"> 男
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="gender" value="女"> 女
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">部门</label>
+                            <div class="col-sm-10">
+                                <select class="form-control deptSelect" name="dId" id="deptUpdateSelect"></select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="updateSubmit">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标题 -->
+    <div class="row">
+        <div class="col-md-12">
+            <h1>SSM-CRUD</h1>
+        </div>
+    </div>
+    <!-- 新增员工以及批量删除按钮 -->
+    <div class="row">
+        <div class="col-md-4 col-md-offset-8">
+            <button class="btn btn-primary" id="empAddBtn">新增</button>
+            <button class="btn btn-danger" id="deleteChecked">删除</button>
+        </div>
+    </div>
+    <!-- 通过表格显示员工数据 -->
+    <div class="table table-hover">
+        <div class="col-md-12">
+            <table class="table" id="empTable">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="checkAll" />
+                        </th>
+                        <th>员工id</th>
+                        <th>员工姓名</th>
+                        <th>性别</th>
+                        <th>Email</th>
+                        <th>所在部门</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <!-- 分页信息 -->
+    <div class="row">
+        <!-- 分页相关信息 -->
+        <div class="col-md-6" id="page_info_area"></div>
+        <!-- 分页条 -->
+        <div class="col-md-6" id="page_nav_area"></div>
+    </div>
+</div>
+
+<!-- 显示页面相关信息（分页信息、分页条、员工信息）的相关js代码 -->
+<script>
+    //总记录数、总页数以及当前页数
+    let totalEmp;
+    let lastPage;
+    let currentPage;
+
+    //页面加载完成时，发送Ajax请求获取第一页数据。并将部门信息添加到模态框中（用于添加员工或修改员工信息时指定部门）
+    $(function () {
+        getDepts(".deptSelect");
+        toPage(1);
+    });
+
+    //使用Ajax获取部门信息，填充到模态框的下拉列表中
+    function getDepts(element) {
+        $.ajax({
+            url: "depts",
+            type:"GET",
+            success:function (result) {
+                $.each(result.extend.departments, function (index, item) {
+                    //每个插件出来的选项是这种格式：<option value="{id}">deptName</option>
+                    let option = $("<option></option>").append(item.deptName).attr("value", item.deptId);
+                    option.appendTo(element);
+                })
+            }
+        })
+
+    }
+
+    //封装发送Ajax请求的步骤，发送请求获取指定页数的数据，并渲染到页面
+    function toPage(page) {
+        $.ajax({
+            url:"emps",
+            data:"page=" + page,
+            type:"GET",
+            //回调函数，解析获取的数据，渲染页面
+            success:function (result) {
+                //解析数据，显示员工信息
+                showEmpsTable(result);
+                //显示分页条
+                showPageNav(result);
+                //显示分页相关信息（多少页，总共多少条记录等）
+                showPageDescription(result);
+            }
+        });
+    }
+
+    //通过DOM API让员工信息以table形式展示
+    function showEmpsTable(result) {
+        //先清空原本的数据
+        $("#empTable tbody").empty();
+
+        //获取全部员工信息
+        let emps = result.extend.pageInfo.list;
+        //对员工信息遍历
+        $.each(emps, function (index, item) {
+            //根据每个employee创建表格
+            let checkBoxTd = $("<td><input type='checkbox' class='checkItem' /></td>");
+            let empIdTd = $("<td></td>").append(item.empId);
+            let empNameTd = $("<td></td>").append(item.empName);
+            let genderTd = $("<td></td>").append(item.gender);
+            let emailTd = $("<td></td>").append(item.email);
+            let deptNameTd = $("<td></td>").append(item.department.deptName);
+
+            //创建两个按钮，以下是两个按钮
+            let editBtn = $("<button></button>").addClass("btn btn-primary btn-sm editBtn")
+                                    .append($("<span></span>").addClass("glyphicon glyphicon-pencil"))
+                                    .append("编辑")
+                                    .attr("eid", item.empId);//设置对应员工的id值
+            let delBtn = $("<button></button>").addClass("btn btn-danger btn-sm delBtn")
+                .append($("<span></span>").addClass("glyphicon glyphicon-trash"))
+                .append("删除")
+                .attr("eid", item.empId);//设置对应员工的id值
+            let btnTd = $("<td></td>").append(editBtn).append(" ").append(delBtn);
+
+            $("<tr></tr>").append(checkBoxTd)
+                .append(empIdTd)
+                .append(empNameTd)
+                .append(genderTd)
+                .append(emailTd)
+                .append(deptNameTd)
+                .append(btnTd)//所有表格添加为一行
+                .appendTo("#empTable tbody");
+        });
+    }
+
+    //显示分页相关信息
+    function showPageDescription(result) {
+        //先清空原本的数据
+        $("#page_info_area").empty();
+
+        let pageNum = result.extend.pageInfo.pageNum;
+        let totalPages = result.extend.pageInfo.pages;
+        let total = result.extend.pageInfo.total;
+        totalEmp = total;
+        lastPage = totalPages;
+        currentPage = pageNum;
+        $("#page_info_area").append("当前第" + pageNum +"页，共" + totalPages + "页，共" + total + "条记录");
+    }
+
+    //显示分页条
+    function showPageNav(result) {
+        //先清空原本的nav
+        $("#page_nav_area").empty();
+
+        //创建导航条，并添加bootstrap属性
+        let nav = $("<nav></nav>").attr("aria-label","Page navigation");
+        //创建ul，添加bootstrap属性
+        let ul = $("<ul></ul>").addClass("pagination");
+
+        //首页、尾页
+        let firstPageLi = $("<li></li>").append($("<a></a>").append("首页"));
+        let lastPageLi = $("<li></li>").append($("<a></a>").append("尾页"));
+
+        //前一页、后一页
+        let prePageLi = $("<li></li>").append($("<a></a>").append("&laquo;"));
+        let nextPageLi = $("<li></li>").append($("<a></a>").append("&raquo;"));
+
+        //若有前一页
+        if(result.extend.pageInfo.hasPreviousPage){
+            //点击首页链接，跳转到第一页
+            firstPageLi.click(function () {
+                toPage(1);
+            });
+            //点击前一页，跳转到前一页
+            prePageLi.click(function () {
+                toPage(result.extend.pageInfo.pageNum-1);
+            });
+        }
+        else {
+            firstPageLi.addClass("disabled");
+            prePageLi.addClass("disabled");
+        }
+
+        //若有后一页
+        if(result.extend.pageInfo.hasNextPage){
+            lastPageLi.click(function () {
+                toPage(result.extend.pageInfo.pages);
+            });
+            nextPageLi.click(function () {
+                toPage(result.extend.pageInfo.pageNum+1);
+            })
+        }
+        //否则
+        else {
+            lastPageLi.addClass("disabled");
+            nextPageLi.addClass("disabled");
+        }
+
+        //首页跟前一页li加进ul
+        ul.append(firstPageLi).append(prePageLi);
+
+        //构建页码li，并加进ul；navigatepageNums表示分页条希望显示的页码li个数
+        $.each(result.extend.pageInfo.navigatepageNums, function (index, item) {
+            let numLi = $("<li></li>").append($("<a></a>").append(item));
+
+            numLi.click(function () {
+                toPage(item);
+            });
+
+            if(result.extend.pageInfo.pageNum == item){
+                numLi.addClass("active");
+            }
+
+            ul.append(numLi);
+        });
+
+        //后一页跟尾页加进ul
+        ul.append(nextPageLi).append(lastPageLi);
+        //ul加进nav
+        nav.append(ul);
+
+        //添加到div中
+        nav.appendTo("#page_nav_area");
+    }
+
+</script>
+
+<!-- 表单校验相关代码 -->
+<script>
+    //重置新增员工模态框中表单的数据、样式
+    //用于点击新增按钮弹出模态框时情况模态框的样式
+    function resetForm(element){
+        $(element)[0].reset();
+        $(element).find("*").removeClass("has-error has-success");
+        $(element).find("*").removeAttr("name-pass email-pass");
+        $(element).find(".help-block").text("");
+    }
+
+    //用户名输入框内容变化时，先判断是否符合正则表达式；
+    //若符合，再发送Ajax请求，判断用户名是否已存在
+    $("#empNameInput").change(function () {
+        let empName = $("#empNameInput").val();
+        let nameReg = /(^[a-zA-Z0-9_-]{3,16}$)|(^^[\u2E80-\u9FFF]{2,8})/;//校验员工名的正则表达式
+
+        //正则表达式的test方法对传入的参数进行校验，若满足正则表达式，则返回true，否则false
+        //输入错误时，使用bootstrap的表单校验状态css
+        if(!nameReg.test(empName)){
+            $("#empNameInput").attr("name-pass", "false");
+            showVerityMsg("#empNameInput", false, "用户名是3-16位的数字、英文或2-8位的中文");
+            return;
+        }else{
+            $.ajax({
+                url: "checkName",
+                data: "empName=" + $("#empNameInput").val(),
+                type: "POST",
+                success: function (result) {
+                    if(result.code==100){
+                        //用户名可用，也要检测是否满足其他条件
+                        showVerityMsg("#empNameInput", true, "用户名可用");
+                        $("#empNameInput").attr("name-pass", "true");//设置name-pass属性。在提交时会对根据该属性觉得是否发送请求
+                    }else{
+                        showVerityMsg("#empNameInput", false, "用户名不可用");
+                        $("#empNameInput").attr("name-pass", "false");
+                    }
+                }
+            })
+        }
+
+    })
+
+    //邮箱输入框内容变化时进行校验。逻辑与员工名校验相似
+    $("#empEmailInput").change(function () {
+        let email = $("#empEmailInput").val();
+        let emailReg = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;//检验邮箱
+
+        if(!emailReg.test(email)){
+            $("#empEmailInput").attr("email-pass", "false");
+            showVerityMsg("#empEmailInput", false, "邮箱格式输入错误");
+        }else{
+            showVerityMsg("#empEmailInput", true, "");
+            $("#empEmailInput").attr("email-pass", "true");
+        }
+    })
+
+    //显示校验信息、样式
+    //element是指定的元素，status是校验成功与否，msg是提示信息
+    function showVerityMsg(element, status, msg){
+        //先清空原来的样式、信息
+        $(element).parent().removeClass("has-error has-success");
+        $(element).next("span").text("");
+
+        if(!status){
+            $(element).parent().addClass("has-error");
+            $(element).next("span").text(msg);
+        }else {
+            $(element).parent().addClass("has-success");
+            $(element).next("span").text(msg);//输入正确清空提示信息
+        }
+
+    }
+</script>
+
+<!-- 添加员工模态框的相关js代码 -->
+<script>
+    //“新增”的点击事件
+    $("#empAddBtn").click(function () {
+        //先重设模态框的输入框信息
+        resetForm("#empAddModal form");
+
+        //打开模态框
+        $("#empAddModal").modal("show");
+    });
+
+    //提交按钮添加事件
+    $("#addSubmit").click(function () {
+        //只有员工名以及邮箱输入框拥有name-pass、email-pass属性，且属性值为true方可发送Ajax请求进行添加操作
+        if($("#empNameInput").attr("name-pass")!="true" || $("#empEmailInput").attr("email-pass")!="true"){
+            return;
+        }
+
+        //发送Ajax请求
+        $.ajax({
+            url: "emp",
+            type: "POST",
+            //使用serialize()方法格式化表单中的字段信息，让其以 param1=value1&param2=value2&... 的形式返回
+            //其返回的值可以直接作为参数数据发送给服务器
+            data: $("#empAddModal form").serialize(),
+            success: function (result) {
+                if(result.code==100){
+                    //关闭模态框
+                    $("#empAddModal").modal("hide");
+                    //跳转到最后一页（加1保证跳转至最后一页）
+                    toPage(lastPage+1);
+
+                }else {
+                    //判断哪个字段出现错误，若有错误显示对应样式
+                    if(undefined != result.extend.errorFields.email){
+                        $("#empEmailInput").attr("email-pass", "false");
+                        showVerityMsg("#empEmailInput", false, result.extend.errorFields.email);
+                    }
+                    if(undefined != result.extend.errorFields.empName){
+                        $("#empNameInput").attr("name-pass", "false");
+                        showVerityMsg("#empNameInput", false, result.extend.errorFields.empName);
+                    }
+                }
+            }
+        })
+    })
+</script>
+
+<!-- 修改员工信息模态框相关js代码 -->
+<script>
+    //员工信息表格中的编辑按钮都是页面加载完成后才通过Ajax创建的，所以使用普通的单击事件绑定不能生效
+    //这里使用jQuery的on函数，其可在通过Ajax创建按钮后对按钮添加点击事件
+    //其参数分别是：事件类型，选择器，函数
+    $(document).on("click", ".editBtn", function () {
+        //先查出员工信息并填充进输入框
+        setEmpInfoById($(this).attr("eid"));
+
+        //将员工id作为属性添加到更新按钮
+        $("#updateSubmit").attr("eid", $(this).attr("eid"));
+
+        //打开模态框
+        $("#empUpdateModal").modal("show");
+    })
+
+    //填充模态框的员工信息
+    function setEmpInfoById(id) {
+        $.ajax({
+            url:"emp/"+id,
+            type:"GET",
+            success:function (result) {
+                let employee = result.extend.emp;
+                $("#staticEmpName").text(employee.empName);
+                $("#empEmailUpdateInput").val(employee.email);
+                $("#empUpdateModal input[name=gender]").val([employee.gender]);
+                $("#empUpdateModal select").val([employee.dId]);
+            }
+        })
+    }
+
+    //提交按钮的点击事件
+    $("#updateSubmit").click(function () {
+        //验证
+        let email = $("#empEmailUpdateInput").val();
+        let emailReg = /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/;//检验邮箱
+
+        if(!emailReg.test(email)){
+            showVerityMsg("#empEmailUpdateInput", false, "邮箱格式输入错误");
+            return false;
+        }else{
+            showVerityMsg("#empEmailUpdateInput", true, "");
+        }
+
+        //发送Ajax请求修改数据
+        //第一种方法是使用post请求，带上_method参数，让HiddenHttpMethodFilter将请求转换为put
+        // $.ajax({
+        //     url: "emp/" + $(this).attr("eid"),
+        //     type: "POST",
+        //     data: $("#empUpdateModal form").serialize() + "&_method=PUT",
+        //     success: function (result) {
+        //         alert(result.msg);
+        //     }
+        // })
+
+        //第二种方式是直接发送put请求，但tomcat对于put（对delete也是）请求的参数信息不会封装进request对象
+        //在服务器端的控制器中不能将参数信息封装进JavaBean，从而导致执行数据库操作时发送语法错误
+        //需要在服务器端配置FormContentFilter
+        $.ajax({
+            url: "emp/" + $(this).attr("eid"),
+            type: "PUT",
+            data: $("#empUpdateModal form").serialize(),
+            success: function (result) {
+                alert(result.msg);
+                if(result.code==100){
+                    //关闭模态框
+                    $("#empUpdateModal").modal("hide");
+                    //刷新页面
+                    toPage(currentPage);
+                }
+            }
+        })
+    })
+</script>
+
+<!-- 删除员工按钮。包括单个删除，批量删除 -->
+<script>
+    //页面加载完成后为删除按钮（表格中的）添加点击事件
+    $(document).on("click", ".delBtn", function () {
+        let empName = $(this).parents("tr").find("td:eq(2)").text();
+        let eid = $(this).attr("eid");
+        //
+        if(confirm("确认删除员工【" + empName + "】吗？")){
+            $.ajax({
+                url: "emp/" + eid,
+                type: "DELETE",
+                success: function (result) {
+                    alert(result.msg);
+                    //跳转到当前页
+                    toPage(currentPage);
+                }
+            })
+        }
+    })
+
+    //为全部选中/不选中的checkbox添加点击事件
+    $("#checkAll").click(function () {
+        //获取元素原生的属性值使用prop更合适。这里若使用attr，获取到的checked将是undefined
+        //获取当前checkbox的状态
+        let checkStatus = $(this).prop("checked");
+        //将所有单项checkbox的状态设为与之相同
+        $(".checkItem").prop("checked", checkStatus);
+    })
+
+    //当单项checkbox全部被选中时，checkAll也应该是被选中状态
+    $(document).on("click", ".checkItem", function () {
+        let status = $(".checkItem:checked").length==$(".checkItem").length;
+        $("#checkAll").prop("checked", status);
+    })
+
+    //为批量删除按钮添加点击事件
+    $("#deleteChecked").click(function () {
+        let empNames = "";//被选中的所有员工名
+        let empIds = "";//被选中的所有员工的id
+        $.each($(".checkItem:checked"), function () {
+            //组装员工名
+            empNames += ($(this).parents("tr").find("td:eq(2)").text() + ",");
+            //组装员工id
+            empIds += ($(this).parents("tr").find("td:eq(1)").text() + "-");
+        })
+
+        //去除多余的 ， -
+        empNames = empNames.substr(0, empNames.length-1);
+        empIds = empIds.substr(0, empIds.length-1);
+
+        if(empNames==""){
+            alert("请选择要删除的员工");
+        }
+        else {
+            if(confirm("确认删除选中员工【" + empNames + "】吗？")){
+                $.ajax({
+                    url: "emp/" + empIds,
+                    type: "DELETE",
+                    success: function (result) {
+                        alert(result.msg);
+                        toPage(currentPage);
+                    }
+                })
+            }
+        }
+    });
+
+
+</script>
+</body>
+</html>

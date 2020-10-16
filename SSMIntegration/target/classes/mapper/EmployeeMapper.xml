@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ssm.dao.EmployeeMapper" >
+    <resultMap id="BaseResultMap" type="com.ssm.bean.Employee" >
+        <id column="emp_id" property="empId" jdbcType="INTEGER" />
+        <result column="emp_name" property="empName" jdbcType="VARCHAR" />
+        <result column="gender" property="gender" jdbcType="CHAR" />
+        <result column="email" property="email" jdbcType="VARCHAR" />
+        <result column="d_id" property="dId" jdbcType="INTEGER" />
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+        delete from employees
+        where emp_id = #{empId,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.ssm.bean.Employee" >
+        insert into employees (emp_id, emp_name, gender,
+        email, d_id)
+        values (#{empId,jdbcType=INTEGER}, #{empName,jdbcType=VARCHAR}, #{gender,jdbcType=CHAR},
+        #{email,jdbcType=VARCHAR}, #{dId,jdbcType=INTEGER})
+    </insert>
+    <update id="updateByPrimaryKey">
+        update employees
+        <set>
+            <if test="empName!=null">emp_name = #{empName},</if>
+            <if test="gender!=null">gender = #{gender},</if>
+            <if test="email!=null">email= #{email},</if>
+            <if test="dId!=null">d_id = #{dId},</if>
+        </set>
+        where emp_id = #{empId}
+    </update>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select emp_id, emp_name, gender, email, d_id
+        from employees
+        where emp_id = #{empId,jdbcType=INTEGER}
+    </select>
+    <select id="selectAll" resultMap="empWithDept" >
+        select emp_id,emp_name,gender,email,d_id,dept_name
+        from employees
+        left join dept d
+        on employees.d_id = d.dept_id
+    </select>
+
+    <resultMap id="dept" type="Department">
+        <id property="deptId" column="d_id" />
+        <result property="deptName" column="dept_name" />
+    </resultMap>
+    <resultMap id="empWithDept" type="employee">
+        <id property="empId" column="emp_id"/>
+        <result property="empName" column="emp_name"/>
+        <result property="gender" column="gender" />
+        <result property="email" column="email"/>
+        <result property="dId" column="d_id" />
+        <association property="department" resultMap="dept"/>
+    </resultMap>
+    <select id="selectByIdWithDept" resultMap="empWithDept">
+        select emp_id,emp_name,gender,email,d_id,dept_name
+        from employees
+        left join dept d
+        on employees.d_id = d.dept_id
+        where emp_id=#{id}
+    </select>
+
+    <select id="selectByCondition" resultMap="BaseResultMap">
+        select * from employees
+        <where>
+            <if test="empName!=null">and emp_name like #{empName}</if>
+            <if test="gender!=null">and gender = #{gender}</if>
+            <if test="email!=null">and email=  = #{email}</if>
+            <if test="dId!=null">and did = #{dId}</if>
+        </where>
+    </select>
+
+    <select id="selectByName" resultMap="BaseResultMap">
+        select * from employees where emp_name = #{name};
+    </select>
+
+    <delete id="deleteBatch">
+        delete from employees
+        where emp_id
+        in
+        <foreach collection="collection" index="index" item="id"
+                 open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

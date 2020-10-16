@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.ssm">
+        <!-- 扫描除了被Controller之外的类（此处等价于扫描除了controller包之外的包）-->
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+    </context:component-scan>
+
+    <!-- 加载配置文件 -->
+    <context:property-placeholder location="classpath:jdbc.properties" />
+
+    <!-- 配置数据库连接池，这里使用德鲁伊 -->
+    <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource">
+        <property name="driverClassName" value="${driver}" />
+        <property name="url" value="${url}" />
+        <property name="username" value="${user}" />
+        <property name="password" value="${password}" />
+    </bean>
+
+    <!-- ==========================spring和MyBatis完美整合=========================== -->
+    <!-- mybatis的主配置文件中的所有配置，都可以在SqlSessionFactoryBean中进行配置 -->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+        <!-- 指定数据源 -->
+        <property name="dataSource" ref="dataSource" />
+        <!-- 指定映射文件 -->
+        <property name="mapperLocations" value="classpath:mapper/*.xml" />
+        <!-- 指定别名 -->
+        <property name="typeAliasesPackage" value="com.ssm.bean" />
+
+        <!-- 配置分页插件 -->
+        <property name="plugins">
+            <set>
+                <bean class="com.github.pagehelper.PageInterceptor" />
+            </set>
+        </property>
+    </bean>
+
+    <!-- SqlSessionTemplate是线程安全的 -->
+    <bean class="org.mybatis.spring.SqlSessionTemplate" id="sessionTemplate">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />
+        <constructor-arg name="executorType" value="BATCH" />
+    </bean>
+
+    <!-- 扫描dao接口，将dao接口的实现类添加到ioc容器（Root WebApplicationContext）中 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.ssm.dao" />
+    </bean>
+    <!-- ========================================================================== -->
+</beans>

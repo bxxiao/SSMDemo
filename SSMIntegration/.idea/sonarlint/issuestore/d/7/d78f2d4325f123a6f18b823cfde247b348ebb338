@@ -1,0 +1,16 @@
+
+U	java:S106x"9Replace this use of System.out or System.err by a logger.(¼¡¨ò8ìÍ»Ğ.
+q
+java:S4488ƒ"NReplace "@RequestMapping(method = RequestMethod.DELETE)" with "@DeleteMapping"(ó÷Šÿÿÿÿÿ8º´÷İĞ.
+e
+java:S4488:"HReplace "@RequestMapping(method = RequestMethod.GET)" with "@GetMapping"(‹©¹Ã8ÈŠÜ¶Ğ.
+q
+java:S3252$"OUse static access with "com.github.pagehelper.page.PageMethod" for "startPage".(Ì€ÿŒşÿÿÿÿ8Èô—¤Í.
+l
+java:S4488I"JReplace "@RequestMapping(method = RequestMethod.POST)" with "@PostMapping"(€ƒ—òÿÿÿÿÿ8ÛÀÔÓÍ.
+Z	java:S106R"9Replace this use of System.out or System.err by a logger.(ÏÙÿ¬ùÿÿÿÿ8ö†‰Ğ.
+f
+java:S4488`"JReplace "@RequestMapping(method = RequestMethod.POST)" with "@PostMapping"(É‹ËF8Üá©ßÏ.
+Z	java:S106S"9Replace this use of System.out or System.err by a logger.(•Øâ¡ÿÿÿÿÿ8˜’Š‰Ğ.
+e
+java:S4488u"HReplace "@RequestMapping(method = RequestMethod.PUT)" with "@PutMapping"(äè¶ô8âİÜºĞ.
