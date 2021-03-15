@@ -4,11 +4,6 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="com.ssm">
-        <!-- 扫描除了被Controller之外的类（此处等价于扫描除了controller包之外的包）-->
-        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
-    </context:component-scan>
-
     <!-- 加载配置文件 -->
     <context:property-placeholder location="classpath:jdbc.properties" />
 
@@ -18,6 +13,13 @@
         <property name="url" value="${url}" />
         <property name="username" value="${user}" />
         <property name="password" value="${password}" />
+
+        <!-- 最大连接池数量 -->
+        <property name="maxActive" value="30" />
+        <!-- 最小连接池 -->
+        <property name="minIdle" value="10" />
+        <!-- 连接超时时间 -->
+        <property name="validationQueryTimeout" value="3" />
     </bean>
 
     <!-- ==========================spring和MyBatis完美整合=========================== -->
